@@ -65,7 +65,7 @@ public class MainFragment extends Fragment {
     }
 
     private void userInfoObserveViewModel(MainFragmentViewModel viewModel) {
-        viewModel.getUserInfoObservable().observe(this, new Observer<User>() {
+        viewModel.getUserInfoObservable().observe(getViewLifecycleOwner(), new Observer<User>() {
             @Override
             public void onChanged(User user) {
                 if (user != null) {
@@ -76,7 +76,7 @@ public class MainFragment extends Fragment {
     }
 
     private void projectObserveViewModel(MainFragmentViewModel viewModel) {
-        viewModel.getProjectListObservable().observe(this, new Observer<List<Project>>() {
+        viewModel.getProjectListObservable().observe(getViewLifecycleOwner(), new Observer<List<Project>>() {
             @Override
             public void onChanged(List<Project> projects) {
                 if (projects != null) {

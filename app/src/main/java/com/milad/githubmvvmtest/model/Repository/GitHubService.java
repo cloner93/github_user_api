@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+import io.reactivex.Single;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -17,14 +18,14 @@ public interface GitHubService {
     String HTTPS_API_GITHUB_URL = "https://api.github.com/";
 
     @GET("users/{user}")
-    Call<User> getUser(@Path("user") String user);
+    Single<User> getUser(@Path("user") String user);
 
     @GET("users/{user}/repos")
-    Call<List<Project>> getProjectList(@Path("user") String user);
+    Single<List<Project>> getProjectList(@Path("user") String user);
 
     @GET("/repos/{user}/{reponame}")
-    Call<Project> getProjectDetails(@Path("user") String user, @Path("reponame") String projectName);
+    Single<Project> getProjectDetails(@Path("user") String user, @Path("reponame") String projectName);
 
     @GET("/repos/{user}/{reponame}/languages")
-    Call<ResponseBody> getProjectLanguages(@Path("user") String user, @Path("reponame") String projectName);
+    Single<ResponseBody> getProjectLanguages(@Path("user") String user, @Path("reponame") String projectName);
 }
