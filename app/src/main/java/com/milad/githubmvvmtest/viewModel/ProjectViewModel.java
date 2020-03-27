@@ -14,6 +14,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.milad.githubmvvmtest.model.Project;
 import com.milad.githubmvvmtest.model.Repository.ProjectRepository;
 
+import java.io.IOException;
+
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -85,10 +87,12 @@ public class ProjectViewModel extends AndroidViewModel {
 
                     @Override
                     public void onSuccess(ResponseBody responseBody) {
-                        Log.d("esh", "onSuccess: " + responseBody.toString());
-                        languageLiveData.setValue(responseBody.toString());
+                        try {
+                            languageLiveData.setValue(responseBody.string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
-
                     @Override
                     public void onError(Throwable e) {
                         languageLiveData.setValue("");
