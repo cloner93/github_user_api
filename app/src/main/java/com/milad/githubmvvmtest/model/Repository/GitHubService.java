@@ -3,14 +3,10 @@ package com.milad.githubmvvmtest.model.Repository;
 import com.milad.githubmvvmtest.model.Project;
 import com.milad.githubmvvmtest.model.User;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.List;
 
 import io.reactivex.Single;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 
