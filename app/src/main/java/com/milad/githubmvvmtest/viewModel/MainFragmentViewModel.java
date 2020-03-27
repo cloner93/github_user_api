@@ -1,6 +1,7 @@
 package com.milad.githubmvvmtest.viewModel;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -44,7 +46,10 @@ public class MainFragmentViewModel extends AndroidViewModel {
     }
 
     public LiveData<User> getUserInfoObservable() {
-        userInfoObservable.subscribeOn(Schedulers.io()).subscribe(new SingleObserver<User>() {
+        userInfoObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<User>() {
             @Override
             public void onSubscribe(Disposable d) {
                 disposableUserInfo = d;
@@ -53,10 +58,13 @@ public class MainFragmentViewModel extends AndroidViewModel {
             @Override
             public void onSuccess(User user) {
                 userInfoLiveData.setValue(user);
+                Log.d("jojo", "getUserInfoObservable: " + user.login);
             }
 
             @Override
             public void onError(Throwable e) {
+                Log.d("jojo", "getUserInfoObservable: " + e.toString());
+
                 userInfoLiveData.setValue(null);
             }
         });
@@ -64,7 +72,10 @@ public class MainFragmentViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<Project>> getProjectListObservable() {
-        projectListObservable.subscribeOn(Schedulers.io()).subscribe(new SingleObserver<List<Project>>() {
+        projectListObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<List<Project>>() {
             @Override
             public void onSubscribe(Disposable d) {
                 disposableProject = d;

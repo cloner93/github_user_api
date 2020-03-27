@@ -8,7 +8,7 @@ import java.util.List;
 import io.reactivex.Single;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ProjectRepository {
@@ -18,7 +18,7 @@ public class ProjectRepository {
     private ProjectRepository() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(GitHubService.HTTPS_API_GITHUB_URL)
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
