@@ -1,5 +1,8 @@
 package com.milad.githubmvvmtest.model.Repository;
 
+import android.app.Application;
+import android.util.Log;
+
 import com.milad.githubmvvmtest.model.Project;
 import com.milad.githubmvvmtest.model.User;
 
@@ -7,47 +10,55 @@ import java.util.List;
 
 import io.reactivex.Single;
 import okhttp3.ResponseBody;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ProjectRepository {
-    private GitHubService gitHubService;
+    private StoreUserName sharedPrefService = null;
+    private GitHubService gitHubService = null;
     private static ProjectRepository projectRepository;
+    private String userId;
 
-    private ProjectRepository() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(GitHubService.HTTPS_API_GITHUB_URL)
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        gitHubService = retrofit.create(GitHubService.class);
+    private ProjectRepository(Application application, String userId) {
+        Log.d("jojo", "ProjectRepository -> ProjectRepository: init in constrictor");
+        gitHubService = new getGitHubService().getRetrofit();
+        sharedPrefService = new StoreUserName(application);
+        this.userId = userId;
     }
 
-    public synchronized static ProjectRepository getInstance() {
+    public synchronized static ProjectRepository getInstance(Application application, String userID) {
         if (projectRepository == null) {
-            projectRepository = new ProjectRepository();
+            projectRepository = new ProjectRepository(application, userID);
         }
         return projectRepository;
     }
 
-    public Single<User> getUser(String userId) {
+    //<editor-fold desc="shared pref">
+    public Single<String> getUserID() {
+        return sharedPrefService.getUserName();
+    }
+
+    public void setUserID(String userID) {
+        sharedPrefService.setUserName(userID);
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Github service">
+    public Single<User> getUser() {
         return gitHubService.getUser(userId);
     }
 
-    public Single<List<Project>> getProjectList(String userId) {
+    public Single<List<Project>> getProjectList() {
         return gitHubService.getProjectList(userId);
     }
 
-    public Single<Project> getProjectDetails(String userID, String projectName) {
-        return gitHubService.getProjectDetails(userID, projectName);
+    public Single<Project> getProjectDetails(String projectName) {
+        return gitHubService.getProjectDetails(userId, projectName);
     }
 
-    public Single<ResponseBody> getProjectLanguages(String userID, String projectName) {
+    public Single<ResponseBody> getProjectLanguages(String projectName) {
 
-        return gitHubService.getProjectLanguages(userID, projectName);
+        return gitHubService.getProjectLanguages(userId, projectName);
     }
+    //</editor-fold>
 
     private void simulateDelay() {
         try {
