@@ -24,9 +24,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainFragmentViewModel extends AndroidViewModel {
-    private final Single<User> userInfoObservable;
-    private final Single<List<Project>> projectListObservable;
-
     private final MutableLiveData<User> userInfoLiveData = new MutableLiveData<User>() {
     };
     private final MutableLiveData<List<Project>> projectListLiveData = new MediatorLiveData<List<Project>>() {
@@ -34,63 +31,76 @@ public class MainFragmentViewModel extends AndroidViewModel {
 
     private Disposable disposableUserInfo;
     private Disposable disposableProject;
+    private ProjectRepository repository;
 
-    private final String userId;
+    private String userId;
 
-    public MainFragmentViewModel(@NonNull Application application, final String userId) {
+    public MainFragmentViewModel(@NonNull Application application) {
         super(application);
-        this.userId = userId;
 
-        userInfoObservable = ProjectRepository.getInstance().getUser(userId);
-        projectListObservable = ProjectRepository.getInstance().getProjectList(userId);
+        repository = ProjectRepository.getInstance(application);
+
+        userId = repository.getUserID();
+    }
+
+    public void setUserId(String userID) {
+        repository.setUserID(userID);
+        userId = userID;
+    }
+
+    public String getUserId() {
+        return repository.getUserID();
     }
 
     public LiveData<User> getUserInfoObservable() {
+        Single<User> userInfoObservable = repository.getUser(userId);
+
         userInfoObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<User>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                disposableUserInfo = d;
-            }
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        disposableUserInfo = d;
+                    }
 
-            @Override
-            public void onSuccess(User user) {
-                userInfoLiveData.setValue(user);
-                Log.d("jojo", "getUserInfoObservable: " + user.login);
-            }
+                    @Override
+                    public void onSuccess(User user) {
+                        userInfoLiveData.setValue(user);
+                        Log.d("jojo", "getUserInfoObservable: " + user.login);
+                    }
 
-            @Override
-            public void onError(Throwable e) {
-                Log.d("jojo", "getUserInfoObservable: " + e.toString());
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("jojo", "getUserInfoObservable: " + e.toString());
 
-                userInfoLiveData.setValue(null);
-            }
-        });
+                        userInfoLiveData.setValue(null);
+                    }
+                });
         return userInfoLiveData;
     }
 
     public LiveData<List<Project>> getProjectListObservable() {
+        Single<List<Project>> projectListObservable = repository.getProjectList(userId);
         projectListObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<List<Project>>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                disposableProject = d;
-            }
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        disposableProject = d;
+                    }
 
-            @Override
-            public void onSuccess(List<Project> projects) {
-                projectListLiveData.setValue(projects);
-            }
+                    @Override
+                    public void onSuccess(List<Project> projects) {
+                        projectListLiveData.setValue(projects);
+                    }
 
-            @Override
-            public void onError(Throwable e) {
-                projectListLiveData.setValue(null);
-            }
-        });
+                    @Override
+                    public void onError(Throwable e) {
+                        projectListLiveData.setValue(null);
+                    }
+                });
         return projectListLiveData;
     }
 
@@ -99,17 +109,14 @@ public class MainFragmentViewModel extends AndroidViewModel {
         @NonNull
         private final Application application;
 
-        private final String userId;
-
-        public Factory(@NonNull Application application, String userId) {
+        public Factory(@NonNull Application application) {
             this.application = application;
-            this.userId = userId;
         }
 
         @Override
         public <T extends ViewModel> T create(Class<T> modelClass) {
             //noinspection unchecked
-            return (T) new MainFragmentViewModel(application, userId);
+            return (T) new MainFragmentViewModel(application);
         }
     }
 

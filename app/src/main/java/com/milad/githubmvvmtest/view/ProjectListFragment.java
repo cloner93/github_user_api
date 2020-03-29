@@ -54,35 +54,29 @@ public class ProjectListFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         ProjectListViewModel.Factory factory = new ProjectListViewModel.Factory(
-                getActivity().getApplication(), getArguments().getString(KEY_USER_ID));
+                getActivity().getApplication());
         final ProjectListViewModel viewModel =
                 ViewModelProviders.of(this, factory).get(ProjectListViewModel.class);
 
         observeViewModel(viewModel);
     }
 
-    private void observeViewModel(ProjectListViewModel viewModel) {
+    private void observeViewModel(final ProjectListViewModel viewModel) {
         // Update the list when the data changes
-        viewModel.getProjectListObservable().observe(this, new Observer<List<Project>>() {
+        viewModel.getProjectListObservable().observe(getViewLifecycleOwner(), new Observer<List<Project>>() {
             @Override
             public void onChanged(List<Project> projects) {
                 if (projects != null) {
                     binding.setIsLoading(false);
-                    binding.setUserId(getArguments().getString(KEY_USER_ID));
+                    binding.setUserId(viewModel.getUserId());
                     projectListAdapter.setProjectList(projects);
                 }
             }
         });
     }
 
-    public static ProjectListFragment forProject(String userId) {
-        ProjectListFragment fragment = new ProjectListFragment();
-        Bundle args = new Bundle();
-
-        args.putString(KEY_USER_ID, userId);
-        fragment.setArguments(args);
-
-        return fragment;
+    public static ProjectListFragment forProject() {
+        return new ProjectListFragment();
     }
 
     private final ProjectClickCallback projectClickCallback = new ProjectClickCallback() {
@@ -90,7 +84,7 @@ public class ProjectListFragment extends Fragment {
         @Override
         public void onClick(Project project) {
             if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                ((MainActivity) getActivity()).showProjectDetail(getArguments().getString(KEY_USER_ID) ,project);
+                ((MainActivity) getActivity()).showProjectDetail(project);
             }
         }
     };

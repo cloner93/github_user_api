@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.milad.githubmvvmtest.R;
 import com.milad.githubmvvmtest.databinding.MainFragmentBinding;
 import com.milad.githubmvvmtest.model.Project;
+import com.milad.githubmvvmtest.model.Repository.StoreUserName;
 import com.milad.githubmvvmtest.model.User;
 import com.milad.githubmvvmtest.view.adapter.MainProjectListAdapter;
 import com.milad.githubmvvmtest.view.callback.MainFragmentClickCallback;
@@ -28,25 +29,25 @@ import com.milad.githubmvvmtest.viewModel.MainFragmentViewModel;
 import java.util.List;
 import java.util.Objects;
 
-public class MainFragment extends Fragment {
+public class MainFragment extends Fragment implements View.OnClickListener {
 
-    static final String TAG = "MainFragment";
+    static final String TAG = "jojo";
     private MainFragmentBinding binding;
     private MainProjectListAdapter mainProjectListAdapter;
-
-    private String userId = "google";
+    private BottomSheetFragment bottomSheetDialog;
+    private StoreUserName storeUserName;
 
     public MainFragment() {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.main_fragment, container, false);
         binding.setOnClickHandler(callback);
 
         mainProjectListAdapter = new MainProjectListAdapter(projectClickCallback);
         binding.projectListMain.setAdapter(mainProjectListAdapter);
+        binding.imageView6.setOnClickListener(this);
 
         return binding.getRoot();
     }
@@ -54,14 +55,20 @@ public class MainFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        MainFragmentViewModel.Factory factory = new MainFragmentViewModel.Factory(
-                getActivity().getApplication(), userId);
 
-        final MainFragmentViewModel viewModel = ViewModelProviders.of(this, factory)
-                .get(MainFragmentViewModel.class);
+        MainFragmentViewModel.Factory factory = new MainFragmentViewModel.Factory(getActivity().getApplication());
+        final MainFragmentViewModel viewModel = ViewModelProviders.of(this, factory).get(MainFragmentViewModel.class);
 
+        userIDViewModel(viewModel);
         userInfoObserveViewModel(viewModel);
         projectObserveViewModel(viewModel);
+    }
+
+    private void userIDViewModel(MainFragmentViewModel viewModel) {
+        String userId = viewModel.getUserId();
+        if (userId.equals(""))
+            viewModel.setUserId("cloner93");
+        // TODO: 3/30/20_3:25 AM give name by dialog
     }
 
     private void userInfoObserveViewModel(MainFragmentViewModel viewModel) {
@@ -90,7 +97,7 @@ public class MainFragment extends Fragment {
     private final MainFragmentClickCallback callback = new MainFragmentClickCallback() {
         @Override
         public void onGetProjects(String userId) {
-            ((MainActivity) Objects.requireNonNull(getContext())).showProjectList(userId);
+            ((MainActivity) Objects.requireNonNull(getContext())).showProjectList();
         }
 
         @Override
@@ -101,12 +108,22 @@ public class MainFragment extends Fragment {
     };
 
     private final ProjectClickCallback projectClickCallback = new ProjectClickCallback() {
-
         @Override
         public void onClick(Project project) {
             if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                ((MainActivity) getActivity()).showProjectDetail(userId ,project);
+                ((MainActivity) getActivity()).showProjectDetail(project);
             }
         }
     };
+
+    @Override
+    public void onClick(View v) {
+        initBottomSheet();
+    }
+
+    private void initBottomSheet() {
+        bottomSheetDialog = BottomSheetFragment.newInstance();
+        bottomSheetDialog.setCancelable(false);
+        bottomSheetDialog.show(getFragmentManager(), "Bottom_Sheet");
+    }
 }

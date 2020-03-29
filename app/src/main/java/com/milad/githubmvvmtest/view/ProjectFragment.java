@@ -62,7 +62,6 @@ public class ProjectFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         ProjectViewModel.Factory factory = new ProjectViewModel.Factory(
                 getActivity().getApplication(),
-                getArguments().getString(KEY_USER_ID),
                 getArguments().getString(KEY_PROJECT_ID));
 
         final ProjectViewModel viewModel = ViewModelProviders.of(this, factory)
@@ -77,7 +76,7 @@ public class ProjectFragment extends Fragment {
 
     private void observeProjectViewModel(final ProjectViewModel viewModel) {
         // Observe project data
-        viewModel.getObservableProject().observe(this, new Observer<Project>() {
+        viewModel.getObservableProject().observe(getViewLifecycleOwner(), new Observer<Project>() {
             @Override
             public void onChanged(@Nullable Project project) {
                 if (project != null) {
@@ -90,7 +89,7 @@ public class ProjectFragment extends Fragment {
 
     private void observeLanguageViewModel(final ProjectViewModel viewModel) {
         // Observe project data
-        viewModel.getObservableLanguage().observe(this, new Observer<String>() {
+        viewModel.getObservableLanguage().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String stringLanguage) {
                 if (!stringLanguage.equals("{}")) {
@@ -128,11 +127,10 @@ public class ProjectFragment extends Fragment {
         return a;
     }
 
-    public static ProjectFragment forProject(String userId, String projectID) {
+    public static ProjectFragment forProject(String projectID) {
         ProjectFragment fragment = new ProjectFragment();
         Bundle args = new Bundle();
 
-        args.putString(KEY_USER_ID, userId);
         args.putString(KEY_PROJECT_ID, projectID);
         fragment.setArguments(args);
 
@@ -145,7 +143,7 @@ public class ProjectFragment extends Fragment {
         int sum = 0;
 
         for (Object e : map) {
-            sum +=(((Map.Entry<String, Integer>) e).getValue());
+            sum += (((Map.Entry<String, Integer>) e).getValue());
         }
 
         for (Object e : map) {

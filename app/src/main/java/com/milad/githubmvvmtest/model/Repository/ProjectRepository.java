@@ -15,24 +15,22 @@ public class ProjectRepository {
     private StoreUserName sharedPrefService = null;
     private GitHubService gitHubService = null;
     private static ProjectRepository projectRepository;
-    private String userId;
 
-    private ProjectRepository(Application application, String userId) {
+    private ProjectRepository(Application application) {
         Log.d("jojo", "ProjectRepository -> ProjectRepository: init in constrictor");
         gitHubService = new getGitHubService().getRetrofit();
         sharedPrefService = new StoreUserName(application);
-        this.userId = userId;
     }
 
-    public synchronized static ProjectRepository getInstance(Application application, String userID) {
+    public synchronized static ProjectRepository getInstance(Application application) {
         if (projectRepository == null) {
-            projectRepository = new ProjectRepository(application, userID);
+            projectRepository = new ProjectRepository(application);
         }
         return projectRepository;
     }
 
     //<editor-fold desc="shared pref">
-    public Single<String> getUserID() {
+    public String getUserID() {
         return sharedPrefService.getUserName();
     }
 
@@ -42,19 +40,19 @@ public class ProjectRepository {
     //</editor-fold>
 
     //<editor-fold desc="Github service">
-    public Single<User> getUser() {
+    public Single<User> getUser(String userId) {
         return gitHubService.getUser(userId);
     }
 
-    public Single<List<Project>> getProjectList() {
+    public Single<List<Project>> getProjectList(String userId) {
         return gitHubService.getProjectList(userId);
     }
 
-    public Single<Project> getProjectDetails(String projectName) {
+    public Single<Project> getProjectDetails(String userId, String projectName) {
         return gitHubService.getProjectDetails(userId, projectName);
     }
 
-    public Single<ResponseBody> getProjectLanguages(String projectName) {
+    public Single<ResponseBody> getProjectLanguages(String userId, String projectName) {
 
         return gitHubService.getProjectLanguages(userId, projectName);
     }

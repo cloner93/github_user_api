@@ -25,9 +25,6 @@ import okhttp3.ResponseBody;
 
 public class ProjectViewModel extends AndroidViewModel {
 
-    private final Single<Project> projectObservable;
-    private final Single<ResponseBody> languageObservable;
-
     private final MutableLiveData<Project> projectLiveData = new MutableLiveData<Project>() {
     };
     private final MutableLiveData<String> languageLiveData = new MutableLiveData<String>() {
@@ -35,23 +32,24 @@ public class ProjectViewModel extends AndroidViewModel {
 
     private final String userID;
     private final String projectID;
+    private ProjectRepository repository;
 
     private Disposable disposableProject;
     private Disposable disposableLanguage;
 
     public ObservableField<Project> project = new ObservableField<>();
 
-    public ProjectViewModel(@NonNull Application application, final String userID, final String projectID) {
+    public ProjectViewModel(@NonNull Application application, final String projectID) {
         super(application);
-        this.userID = userID;
         this.projectID = projectID;
 
-        projectObservable = ProjectRepository.getInstance().getProjectDetails(userID, projectID);
-        languageObservable = ProjectRepository.getInstance().getProjectLanguages(userID, projectID);
+        repository = ProjectRepository.getInstance(application);
+        userID = repository.getUserID();
     }
 
-
     public LiveData<Project> getObservableProject() {
+        Single<Project> projectObservable = repository.getProjectDetails(userID, projectID);
+
         projectObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -76,6 +74,8 @@ public class ProjectViewModel extends AndroidViewModel {
     }
 
     public LiveData<String> getObservableLanguage() {
+        Single<ResponseBody> languageObservable = repository.getProjectLanguages(userID, projectID);
+
         languageObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -93,6 +93,7 @@ public class ProjectViewModel extends AndroidViewModel {
                             e.printStackTrace();
                         }
                     }
+
                     @Override
                     public void onError(Throwable e) {
                         languageLiveData.setValue("");
@@ -110,19 +111,18 @@ public class ProjectViewModel extends AndroidViewModel {
         @NonNull
         private final Application application;
 
-        private final String userID;
         private final String projectID;
 
-        public Factory(@NonNull Application application, String userID, String projectID) {
+        public Factory(@NonNull Application application, String projectID) {
             this.application = application;
-            this.userID = userID;
             this.projectID = projectID;
         }
 
+        @NonNull
         @Override
-        public <T extends ViewModel> T create(Class<T> modelClass) {
+        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
             //noinspection unchecked
-            return (T) new ProjectViewModel(application, userID, projectID);
+            return (T) new ProjectViewModel(application, projectID);
         }
     }
 

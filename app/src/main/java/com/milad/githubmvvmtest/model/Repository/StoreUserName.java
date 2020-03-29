@@ -3,8 +3,6 @@ package com.milad.githubmvvmtest.model.Repository;
 import android.app.Application;
 import android.content.SharedPreferences;
 
-import io.reactivex.Single;
-
 public class StoreUserName {
     private Application application;
     private SharedPreferences sharedpreferences;
@@ -18,8 +16,8 @@ public class StoreUserName {
         editor = sharedpreferences.edit();
     }
 
-    public Single<String> getUserName() {
-        return Single.just(sharedpreferences.getString("userName", ""));
+    public String getUserName() {
+        return (sharedpreferences.getString("userName", ""));
     }
 
     public void setUserName(String userID) {

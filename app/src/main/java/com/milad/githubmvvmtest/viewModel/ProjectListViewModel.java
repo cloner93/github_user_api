@@ -21,20 +21,28 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class ProjectListViewModel extends AndroidViewModel {
-    private final Single<List<Project>> projectListObservable;
+
     private final MutableLiveData<List<Project>> projectListLiveData = new MutableLiveData<List<Project>>() {
     };
     private final String userId;
+    private ProjectRepository repository;
+
     private Disposable disposableProject;
 
-    public ProjectListViewModel(@NonNull Application application, String userId) {
+    public ProjectListViewModel(@NonNull Application application) {
         super(application);
-        this.userId = userId;
 
-        projectListObservable = ProjectRepository.getInstance().getProjectList(userId);
+        repository = ProjectRepository.getInstance(application);
+        userId = repository.getUserID();
+    }
+
+    public String getUserId() {
+        return repository.getUserID();
     }
 
     public LiveData<List<Project>> getProjectListObservable() {
+        Single<List<Project>> projectListObservable = repository.getProjectList(userId);
+
         projectListObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -54,7 +62,6 @@ public class ProjectListViewModel extends AndroidViewModel {
 
                     }
                 });
-
         return projectListLiveData;
     }
 
@@ -63,17 +70,14 @@ public class ProjectListViewModel extends AndroidViewModel {
         @NonNull
         private final Application application;
 
-        private final String userId;
-
-        public Factory(@NonNull Application application, String userId) {
+        public Factory(@NonNull Application application) {
             this.application = application;
-            this.userId = userId;
         }
 
         @Override
         public <T extends ViewModel> T create(Class<T> modelClass) {
             //noinspection unchecked
-            return (T) new ProjectListViewModel(application, userId);
+            return (T) new ProjectListViewModel(application);
         }
     }
 

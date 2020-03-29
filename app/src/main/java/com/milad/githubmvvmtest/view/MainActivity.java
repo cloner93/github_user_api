@@ -28,8 +28,8 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Shows the project detail fragment
      */
-    public void showProjectDetail(String userId, Project project) {
-        ProjectFragment projectFragment = ProjectFragment.forProject(userId, project.name);
+    public void showProjectDetail(Project project) {
+        ProjectFragment projectFragment = ProjectFragment.forProject(project.name);
 
         getSupportFragmentManager()
                 .beginTransaction()
@@ -37,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container, projectFragment, null).commit();
     }
 
-    public void showProjectList(String userId) {
-        ProjectListFragment fragment = ProjectListFragment.forProject(userId);
+    public void showProjectList() {
+        ProjectListFragment fragment = ProjectListFragment.forProject();
 
         getSupportFragmentManager()
                 .beginTransaction()
