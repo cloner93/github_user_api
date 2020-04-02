@@ -1,20 +1,17 @@
 package com.milad.githubmvvmtest.view;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.res.ColorStateList;
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -31,6 +28,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment implements Vi
     private TextInputLayout inputLayout;
     private StoreUserName storeUserName;
     private String tempName = "";
+    private onBottomsheetNameIdListener callback;
 
     public static BottomSheetFragment newInstance() {
         BottomSheetFragment fragment = new BottomSheetFragment();
@@ -42,6 +40,10 @@ public class BottomSheetFragment extends BottomSheetDialogFragment implements Vi
         super.onCreate(savedInstanceState);
     }
 
+    public void setOnBottomsheetNameIdListener(onBottomsheetNameIdListener callback) {
+        this.callback = callback;
+    }
+
     @Override
     public void setupDialog(Dialog dialog, int style) {
         View contentView = View.inflate(getContext(), R.layout.fragment_bottomsheet, null);
@@ -51,7 +53,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment implements Vi
         editText = contentView.findViewById(R.id.edittext_repo_name);
         inputLayout = contentView.findViewById(R.id.layout_repo_name);
         button.setOnClickListener(this);
-        storeUserName = new StoreUserName(contentView.getContext());
+        storeUserName = new StoreUserName(getActivity().getApplication());
         tempName = storeUserName.getUserName();
         if (!tempName.equals("")) {
             editText.setText(tempName);
@@ -72,6 +74,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment implements Vi
             if (!name.equals("")) {
                 inputLayout.setErrorEnabled(false);
                 setUserName(name);
+                callback.setOnNameId(name);
                 dismiss();
 
             } else {
@@ -82,5 +85,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment implements Vi
 
     private void setUserName(String name) {
         storeUserName.setUserName(name);
+    }
+
+    interface onBottomsheetNameIdListener {
+        void setOnNameId(String nameID);
     }
 }

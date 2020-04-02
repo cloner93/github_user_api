@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,13 +30,12 @@ import com.milad.githubmvvmtest.viewModel.MainFragmentViewModel;
 import java.util.List;
 import java.util.Objects;
 
-public class MainFragment extends Fragment implements View.OnClickListener {
+public class MainFragment extends Fragment implements View.OnClickListener, BottomSheetFragment.onBottomsheetNameIdListener {
 
     static final String TAG = "jojo";
     private MainFragmentBinding binding;
     private MainProjectListAdapter mainProjectListAdapter;
-    private BottomSheetFragment bottomSheetDialog;
-    private StoreUserName storeUserName;
+    MainFragmentViewModel viewModel;
 
     public MainFragment() {
     }
@@ -57,21 +57,22 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         super.onActivityCreated(savedInstanceState);
 
         MainFragmentViewModel.Factory factory = new MainFragmentViewModel.Factory(getActivity().getApplication());
-        final MainFragmentViewModel viewModel = ViewModelProviders.of(this, factory).get(MainFragmentViewModel.class);
+        viewModel = ViewModelProviders.of(this, factory).get(MainFragmentViewModel.class);
 
-        userIDViewModel(viewModel);
-        userInfoObserveViewModel(viewModel);
-        projectObserveViewModel(viewModel);
+        userIDViewModel();
     }
 
-    private void userIDViewModel(MainFragmentViewModel viewModel) {
+    private void userIDViewModel() {
         String userId = viewModel.getUserId();
         if (userId.equals(""))
-            viewModel.setUserId("cloner93");
-        // TODO: 3/30/20_3:25 AM give name by dialog
+            initBottomSheet();
+        else {
+            userInfoObserveViewModel();
+            projectObserveViewModel();
+        }
     }
 
-    private void userInfoObserveViewModel(MainFragmentViewModel viewModel) {
+    private void userInfoObserveViewModel() {
         viewModel.getUserInfoObservable().observe(getViewLifecycleOwner(), new Observer<User>() {
             @Override
             public void onChanged(User user) {
@@ -82,7 +83,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         });
     }
 
-    private void projectObserveViewModel(MainFragmentViewModel viewModel) {
+    private void projectObserveViewModel() {
         viewModel.getProjectListObservable().observe(getViewLifecycleOwner(), new Observer<List<Project>>() {
             @Override
             public void onChanged(List<Project> projects) {
@@ -122,8 +123,17 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     private void initBottomSheet() {
-        bottomSheetDialog = BottomSheetFragment.newInstance();
+        BottomSheetFragment bottomSheetDialog = BottomSheetFragment.newInstance();
         bottomSheetDialog.setCancelable(false);
-        bottomSheetDialog.show(getFragmentManager(), "Bottom_Sheet");
+        bottomSheetDialog.show(getActivity().getSupportFragmentManager(), "Bottom_Sheet");
+        bottomSheetDialog.setOnBottomsheetNameIdListener(this);
+    }
+
+    @Override
+    public void setOnNameId(String nameID) {
+        viewModel.setUserId(nameID);
+
+        userInfoObserveViewModel();
+        projectObserveViewModel();
     }
 }
