@@ -20,6 +20,7 @@ import java.util.List;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -29,8 +30,8 @@ public class MainFragmentViewModel extends AndroidViewModel {
     private final MutableLiveData<List<Project>> projectListLiveData = new MediatorLiveData<List<Project>>() {
     };
 
-    private Disposable disposableUserInfo;
-    private Disposable disposableProject;
+    private CompositeDisposable disposable = new CompositeDisposable();
+
     private ProjectRepository repository;
 
     private String userId;
@@ -61,7 +62,7 @@ public class MainFragmentViewModel extends AndroidViewModel {
                 .subscribe(new SingleObserver<User>() {
                     @Override
                     public void onSubscribe(Disposable d) {
-                        disposableUserInfo = d;
+                        disposable.add(d);
                     }
 
                     @Override
@@ -88,7 +89,7 @@ public class MainFragmentViewModel extends AndroidViewModel {
                 .subscribe(new SingleObserver<List<Project>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
-                        disposableProject = d;
+                        disposable.add(d);
                     }
 
                     @Override
@@ -123,10 +124,6 @@ public class MainFragmentViewModel extends AndroidViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-        if (!disposableProject.isDisposed())
-            disposableProject.dispose();
-        if (!disposableUserInfo.isDisposed()) {
-            disposableUserInfo.dispose();
-        }
+        disposable.clear();
     }
 }

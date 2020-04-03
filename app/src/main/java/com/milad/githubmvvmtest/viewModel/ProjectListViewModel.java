@@ -17,6 +17,7 @@ import java.util.List;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -27,7 +28,7 @@ public class ProjectListViewModel extends AndroidViewModel {
     private final String userId;
     private ProjectRepository repository;
 
-    private Disposable disposableProject;
+    private CompositeDisposable disposable = new CompositeDisposable();
 
     public ProjectListViewModel(@NonNull Application application) {
         super(application);
@@ -49,7 +50,7 @@ public class ProjectListViewModel extends AndroidViewModel {
                 .subscribe(new SingleObserver<List<Project>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
-                        disposableProject = d;
+                        disposable.add(d);
                     }
 
                     @Override
@@ -84,8 +85,6 @@ public class ProjectListViewModel extends AndroidViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-        if (!disposableProject.isDisposed()) {
-            disposableProject.dispose();
-        }
+        disposable.clear();
     }
 }

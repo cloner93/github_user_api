@@ -19,6 +19,7 @@ import java.io.IOException;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
@@ -34,8 +35,7 @@ public class ProjectViewModel extends AndroidViewModel {
     private final String projectID;
     private ProjectRepository repository;
 
-    private Disposable disposableProject;
-    private Disposable disposableLanguage;
+    private CompositeDisposable disposable = new CompositeDisposable();
 
     public ObservableField<Project> project = new ObservableField<>();
 
@@ -56,7 +56,7 @@ public class ProjectViewModel extends AndroidViewModel {
                 .subscribe(new SingleObserver<Project>() {
                     @Override
                     public void onSubscribe(Disposable d) {
-                        disposableProject = d;
+                        disposable.add(d);
                     }
 
                     @Override
@@ -82,7 +82,7 @@ public class ProjectViewModel extends AndroidViewModel {
                 .subscribe(new SingleObserver<ResponseBody>() {
                     @Override
                     public void onSubscribe(Disposable d) {
-                        disposableLanguage = d;
+                        disposable.add(d);
                     }
 
                     @Override
@@ -129,11 +129,6 @@ public class ProjectViewModel extends AndroidViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-        if (!disposableLanguage.isDisposed()) {
-            disposableLanguage.dispose();
-        }
-        if (!disposableProject.isDisposed()) {
-            disposableProject.dispose();
-        }
+        disposable.clear();
     }
 }
